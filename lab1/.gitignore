@@ -1,0 +1,15 @@
+build-*/
+shaders/*.spv
+imgui.ini
+.vscode/
+.vs/
+__pycache__/
+report_work/
+cmake-build-*/
+CMakeUserPresets.json
+~$*
+*.docx
+*.pdf
+CHECKLIST.md
+DEFENSE.md
+screenshot-*.png
