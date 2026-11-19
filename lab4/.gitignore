@@ -1,0 +1,9 @@
+build-*/
+cmake-build-*/
+shaders/*.spv
+imgui.ini
+.vscode/
+.vs/
+CMakeUserPresets.json
+~$*
+submission/
