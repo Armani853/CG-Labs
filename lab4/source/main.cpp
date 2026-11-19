@@ -1,8 +1,15 @@
 #include <cstdint>
 #include <climits>
+#include <cstdlib>
 
 #include <iostream>
 #include <filesystem>
+
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+#include <windows.h>
+#endif
 
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
@@ -23,6 +30,24 @@ constexpr char default_window_title[] = "Computer Graphics Lab 4 - Shadow Mappin
 
 GLFWwindow* glfw_window;
 
+#ifdef _WIN32
+bool configureLocalVulkanDriver() {
+	// Only this process uses the optional driver deployed beside the executable.
+	for (const wchar_t* name : {L"VK_DRIVER_FILES", L"VK_ICD_FILENAMES", L"VK_ADD_DRIVER_FILES"}) {
+		if (GetEnvironmentVariableW(name, nullptr, 0) != 0) return true;
+	}
+
+	std::error_code ec;
+	const auto manifest = std::filesystem::absolute("vulkan-driver/icd.json", ec);
+	if (ec || !std::filesystem::is_regular_file(manifest, ec)) return true;
+	if (!SetEnvironmentVariableW(L"VK_DRIVER_FILES", manifest.c_str())) {
+		std::cerr << "Cannot set the local Vulkan driver for Lab 4\n";
+		return false;
+	}
+	return true;
+}
+#endif
+
 } // namespace
 
 int main(int argc, char** argv) {
@@ -35,6 +60,9 @@ int main(int argc, char** argv) {
 		std::cerr << "Cannot locate the runtime assets: " << filesystem_error.message() << '\n';
 		return EXIT_FAILURE;
 	}
+#ifdef _WIN32
+	if (!configureLocalVulkanDriver()) return EXIT_FAILURE;
+#endif
 	int status = EXIT_SUCCESS;
 
 	if (!glfwInit()) {

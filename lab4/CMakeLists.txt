@@ -50,6 +50,14 @@ FetchContent_Declare(
 	URL_HASH SHA256=af97ed649182c39314320514a672b82008ab462b9293fe23d37b30bfa5d05519
 )
 
+set(local_vulkan_dir "${CMAKE_CURRENT_SOURCE_DIR}/local-vulkan")
+if(WIN32 AND "$ENV{VULKAN_SDK}" STREQUAL "" AND EXISTS "${local_vulkan_dir}/sdk-root.txt")
+	file(STRINGS "${local_vulkan_dir}/sdk-root.txt" local_sdk LIMIT_COUNT 1)
+	string(STRIP "${local_sdk}" local_sdk)
+	if(EXISTS "${local_sdk}/Include/vulkan/vulkan.h")
+		set(ENV{VULKAN_SDK} "${local_sdk}")
+	endif()
+endif()
 find_package(Vulkan REQUIRED)
 
 set(GLFW_LIBRARY_TYPE STATIC)
@@ -138,4 +146,11 @@ if(SHADER_COMPILER)
 		VERBATIM)
 	add_dependencies(runtime_assets shaders)
 	add_dependencies(${PROJECT_NAME} runtime_assets)
+
+	if(WIN32 AND EXISTS "${local_vulkan_dir}/driver/icd.json")
+		add_custom_command(TARGET runtime_assets POST_BUILD
+			COMMAND ${CMAKE_COMMAND} -E copy_directory
+				"${local_vulkan_dir}/driver" "$<TARGET_FILE_DIR:${PROJECT_NAME}>/vulkan-driver"
+			VERBATIM)
+	endif()
 endif()

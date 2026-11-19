@@ -27,6 +27,13 @@ cmake --build build-debug --config Debug --parallel
 драйвер. Если приложение выводит `no_suitable_device`, проверьте версию API
 физического устройства в `vulkaninfo --summary`.
 
+На компьютере со старым драйвером можно использовать локальный Windows ICD,
+например Mesa Lavapipe. Если в `local-vulkan/driver/` лежат его манифест
+`icd.json` и указанные в нём библиотеки, CMake копирует их рядом с EXE.
+Приложение выбирает этот драйвер только для своего процесса. Если SDK уже
+известен CMake, достаточно трёх команд сборки и запуска. Локальный каталог
+не входит в Git или архив исходников.
+
 На Linux с X11, Vulkan Loader, драйвером Vulkan 1.3, заголовками Vulkan, CMake,
 GLFW-зависимостями X11 и `glslc` или `glslangValidator`:
 
